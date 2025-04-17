@@ -50,8 +50,8 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: ./${BINARYNAME}-linux-amd64
-                asset_name: ${BINARYNAME}-linux-amd64
+                asset_path: ./${{ BINARYNAME }}-linux-amd64
+                asset_name: ${{ BINARYNAME }}-linux-amd64
                 asset_content_type: application/zip
 
             - name: upload Linux ARM64 artifacts
