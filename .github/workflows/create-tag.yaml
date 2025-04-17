@@ -1,0 +1,24 @@
+name: "Create Tag"
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Enter the tag to be created'
+
+jobs:
+  create_tag:
+    name: "Create new tag"
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set a new tag with current commit
+        run: |
+          git tag '${{ github.event.inputs.tag_name }}'
+          git push origin --tags
