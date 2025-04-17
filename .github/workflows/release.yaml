@@ -1,0 +1,95 @@
+name: "Release"
+
+on:
+    push:
+        tags:
+            - '*'
+
+jobs:
+    release:
+        name: "Release"
+        permissions: write-all
+        runs-on: ubuntu-latest
+
+        env:
+            BINARYNAME: 'filesizecalc'
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: Set up Go
+              uses: actions/setup-go@v2
+              with:
+                go-version: 1.24
+
+            - name: build
+              run: make build
+
+            - name: version
+              run: echo "${GITHUB_REF#refs/*/}"
+              id: version
+
+            - name: release
+              uses: actions/create-release@v1
+              id: create_release
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                draft: false
+                prerelease: false
+                release_name: ${{ steps.version.outputs.version }}
+                tag_name: ${{ github.ref }}
+                body_path: CHANGELOG.md
+
+            - name: upload Linux AMD64 artifacts
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./${BINARYNAME}-linux-amd64
+                asset_name: ${BINARYNAME}-linux-amd64
+                asset_content_type: application/zip
+
+            - name: upload Linux ARM64 artifacts
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./${BINARYNAME}-linux-arm64
+                asset_name: ${BINARYNAME}-linux-arm64
+                asset_content_type: application/zip
+
+            - name: upload MacOS AMD64 artifacts
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./${BINARYNAME}-darwin-amd64
+                asset_name: ${BINARYNAME}-darwin-amd64
+                asset_content_type: application/zip
+
+            - name: upload MacOS ARM64 artifacts
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./${BINARYNAME}-darwin-arm64
+                asset_name: ${BINARYNAME}-darwin-arm64
+                asset_content_type: application/zip
+
+            - name: upload Windows AMD64 artifacts
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./${BINARYNAME}-windows-64bit
+                asset_name: ${BINARYNAME}-windows-64bit
+                asset_content_type: application/zip
